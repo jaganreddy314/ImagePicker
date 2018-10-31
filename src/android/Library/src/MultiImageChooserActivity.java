@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import android.media.ExifInterface;
 
 import com.synconset.FakeR;
 import android.app.AlertDialog;
@@ -511,12 +512,16 @@ public class MultiImageChooserActivity extends AppCompatActivity implements
         @Override
         protected ArrayList<String> doInBackground(Set<Entry<String, Integer>>... fileSets) {
             Set<Entry<String, Integer>> fileNames = fileSets[0];
+            System.out.println("FileNames: " + fileNames.toString());
             ArrayList<String> al = new ArrayList<String>();
             try {
                 Iterator<Entry<String, Integer>> i = fileNames.iterator();
+                System.out.println("i : " + i);
                 Bitmap bmp;
                 while (i.hasNext()) {
                     Entry<String, Integer> imageInfo = i.next();
+                    File originalFile = new File(imageInfo.getKey());
+                    ExifInterface exifInterface = new ExifInterface(originalFile.getAbsolutePath());
                     File file = new File(imageInfo.getKey());
                     int rotate = imageInfo.getValue();
                     BitmapFactory.Options options = new BitmapFactory.Options();
@@ -568,12 +573,23 @@ public class MultiImageChooserActivity extends AppCompatActivity implements
 
                     if (outputType == OutputType.FILE_URI) {
                         file = storeImage(bmp, file.getName());
+                        if(exifInterface != null) {
+                            ExifInterface exifModifiedImage = new ExifInterface(file.getAbsolutePath());
+                            if(exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE) != null && exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE) != null) {
+                                exifModifiedImage.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                                exifModifiedImage.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+                                if(exifInterface.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL) != null) exifModifiedImage.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, exifInterface.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL));
+                                if(exifInterface.getAttribute(ExifInterface.TAG_GPS_ALTITUDE) != null) exifModifiedImage.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exifInterface.getAttribute(ExifInterface.TAG_GPS_ALTITUDE));
+                                if(exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE) != null) exifModifiedImage.saveAttributes();
+                            }
+                        }
                         al.add(Uri.fromFile(file).toString());
 
                     } else if (outputType == OutputType.BASE64_STRING) {
                         al.add(getBase64OfImage(bmp));
                     }
                 }
+                System.out.println("Files return list A1" + al);
                 return al;
             } catch (IOException e) {
                 try {
@@ -658,6 +674,7 @@ public class MultiImageChooserActivity extends AppCompatActivity implements
         * Copyright (C) 2012, webXells GmbH All Rights Reserved.
         */
         private File storeImage(Bitmap bmp, String fileName) throws IOException {
+            System.out.println("FileName in storing images : "+ fileName);
             int index = fileName.lastIndexOf('.');
             String name = fileName.substring(0, index);
             String ext = fileName.substring(index);
