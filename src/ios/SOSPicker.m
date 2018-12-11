@@ -177,12 +177,18 @@ typedef enum : NSUInteger {
     int i = 1;
     
     CDVPluginResult* result = nil;
-
+    NSString* filePath;
+    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+    NSFileManager* fileMgr = [[NSFileManager alloc] init];
     for (GMFetchItem *item in fetchArray) {
 
         if ( !item.image_fullsize ) { 
             continue;
         }
+
+         do {
+            filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
+        } while ([fileMgr fileExistsAtPath:filePath]);
         
         // no scaling, no downsampling, this is the fastest option
         if (self.width == 0 && self.height == 0 && self.quality == 100 && self.outputType != BASE64_STRING) {
@@ -237,15 +243,6 @@ typedef enum : NSUInteger {
             if(self.outputType == BASE64_STRING){
                 [result_all addObject:[destData base64EncodedStringWithOptions:0]];
             }else{
-                //Write into file
-                NSString* filePath;
-                NSFileManager* fileMgr = [[NSFileManager alloc] init];
-                //Clean or move the temp file after invoked this plugin when not in use, transfering the file into persistent.
-                NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
-                do {
-                    filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
-                } while ([fileMgr fileExistsAtPath:filePath]);
-                
                 if (![destData writeToFile:filePath options:NSAtomicWrite error:&err]) {
                     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
                     break;
