@@ -179,7 +179,6 @@ typedef enum : NSUInteger {
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     //Clean or move the temp file after invoked this plugin when not in use, transfering the file into persistent.
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
-                
     CDVPluginResult* result = nil;
 
     for (GMFetchItem *item in fetchArray) {
@@ -187,10 +186,6 @@ typedef enum : NSUInteger {
         if ( !item.image_fullsize ) { 
             continue;
         }
-
-        do {
-            filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
-        } while ([fileMgr fileExistsAtPath:filePath]);
         
         // no scaling, no downsampling, this is the fastest option
         if (self.width == 0 && self.height == 0 && self.quality == 100 && self.outputType != BASE64_STRING) {
@@ -201,7 +196,12 @@ typedef enum : NSUInteger {
             [result_all addObject:item.image_fullsize];
         }  else {
             //Initialization
+            NSMutableData *destData = nil;
             NSError* err = nil;
+
+            do {
+                filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
+            } while ([fileMgr fileExistsAtPath:filePath]);
             //Create image source
             NSURL * imageFileURL = [NSURL fileURLWithPath:item.image_fullsize];
             NSLog(@"imageFileURL %@", imageFileURL);
@@ -219,7 +219,7 @@ typedef enum : NSUInteger {
         
             //Write Metadata into destination's image
             CFStringRef UTI = kUTTypeJPEG;
-            NSMutableData *destData = [NSMutableData data];
+            destData = [NSMutableData data];
             CGImageDestinationRef destinationRef = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)destData, UTI, 1, NULL);
             if (!destinationRef) {
                 NSString *err = @"Failed to create image destination";
@@ -245,9 +245,7 @@ typedef enum : NSUInteger {
             if(self.outputType == BASE64_STRING){
                 [result_all addObject:[destData base64EncodedStringWithOptions:0]];
             }else{
-                //Write into file
-                
-                
+            
                 if (![destData writeToFile:filePath options:NSAtomicWrite error:&err]) {
                     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
                     break;
