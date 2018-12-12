@@ -3,12 +3,14 @@
 //  SyncOnSet
 //
 //  Created by Christopher Sullivan on 10/25/13.
-//  Modified by Zehui Zhang on 11/12/2018
 //
+//
+
 #import "SOSPicker.h"
+
+
 #import "GMImagePickerController.h"
 #import "GMFetchItem.h"
-@import MobileCoreServices;
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -174,89 +176,63 @@ typedef enum : NSUInteger {
     NSLog(@"GMImagePicker: User finished picking assets. Number of selected items is: %lu", (unsigned long)fetchArray.count);
 
     NSMutableArray * result_all = [[NSMutableArray alloc] init];
-    int i = 1;
-    
-    CDVPluginResult* result = nil;
-    NSString* filePath;
-    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+    CGSize targetSize = CGSizeMake(self.width, self.height);
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
+    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+
+    NSError* err = nil;
+    int i = 1;
+    NSString* filePath;
+    CDVPluginResult* result = nil;
+
     for (GMFetchItem *item in fetchArray) {
 
-        if ( !item.image_fullsize ) { 
+        if ( !item.image_fullsize ) {
             continue;
         }
 
-         do {
+        do {
             filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
         } while ([fileMgr fileExistsAtPath:filePath]);
-        
-        // no scaling, no downsampling, this is the fastest option
-        if (self.width == 0 && self.height == 0 && self.quality == 100 && self.outputType != BASE64_STRING) {
-            //2018-11-12，simPRO eForms-Peter-MA-1919-ExifInAttachment
-            //In GMGridViewController .fixOrientation will purge exif info, a full original size image may showing rotated
-            //Todo-figure out a way to fix orientation for original file as well
-            //Since we are not using original file, this issue is less priority
-            [result_all addObject:item.image_fullsize];
-        }  else {
-            //Initialization
-            NSError* err = nil;
-            //Create image source
-            NSURL * imageFileURL = [NSURL fileURLWithPath:item.image_fullsize];
-            NSLog(@"imageFileURL %@", imageFileURL);
-            CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)(imageFileURL), NULL);
-        
-            //Read metadata
-            NSMutableDictionary *imageMetadata = [(NSDictionary *) CFBridgingRelease(CGImageSourceCopyPropertiesAtIndex(imageSource, 0, NULL))mutableCopy];
-        
-            //Create Compressed, resized image
-            //TODO - max(hegiht, width)
-            CFDictionaryRef options = (__bridge CFDictionaryRef)@{(id)kCGImageSourceCreateThumbnailFromImageAlways: (id)kCFBooleanTrue,
-                                                                  (id)kCGImageSourceThumbnailMaxPixelSize: [NSNumber numberWithInteger:MAX(self.width, self.height)], // The maximum width and height in pixels of a thumbnail
-                                                                  (id)kCGImageDestinationLossyCompressionQuality: [NSNumber numberWithDouble:self.quality/100.0f]};
-            CGImageRef thumbnail = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options);
-        
-            //Write Metadata into destination's image
-            CFStringRef UTI = kUTTypeJPEG;
-            NSMutableData *destData = [NSMutableData data];
-            CGImageDestinationRef destinationRef = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)destData, UTI, 1, NULL);
-            if (!destinationRef) {
-                NSString *err = @"Failed to create image destination";
-                NSLog(@"%@",err);
-                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:err];
-                break;
-            }
 
-            //Copy all metadata in source to destination
-            CGImageDestinationAddImage(destinationRef, thumbnail, (__bridge CFDictionaryRef)imageMetadata);
-            if (!CGImageDestinationFinalize(destinationRef)) {
-                NSString *err = @"Failed to create data from image destination";
-                NSLog(@"%@",err);
-                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:err];
-                break;
+        NSData* data = nil;
+        if (self.width == 0 && self.height == 0) {
+            // no scaling required
+            if (self.outputType == BASE64_STRING){
+                UIImage* image = [UIImage imageNamed:item.image_fullsize];
+                [result_all addObject:[UIImageJPEGRepresentation(image, self.quality/100.0f) base64EncodedStringWithOptions:0]];
+            } else {
+                if (self.quality == 100) {
+                    // no scaling, no downsampling, this is the fastest option
+                    [result_all addObject:item.image_fullsize];
+                } else {
+                    // resample first
+                    UIImage* image = [UIImage imageNamed:item.image_fullsize];
+                    data = UIImageJPEGRepresentation(image, self.quality/100.0f);
+                    if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
+                        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
+                        break;
+                    } else {
+                        [result_all addObject:[[NSURL fileURLWithPath:filePath] absoluteString]];
+                    }
+                }
             }
-        
-            CFRelease(destinationRef);
-            CFRelease(imageSource);
-            CFRelease(thumbnail);
+        } else {
+            // scale
+            UIImage* image = [UIImage imageNamed:item.image_fullsize];
+            UIImage* scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
+            data = UIImageJPEGRepresentation(scaledImage, self.quality/100.0f);
 
-            //Add imageRef into result
-            if(self.outputType == BASE64_STRING){
-                [result_all addObject:[destData base64EncodedStringWithOptions:0]];
-            }else{
-                if (![destData writeToFile:filePath options:NSAtomicWrite error:&err]) {
-                    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
-                    break;
+            if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
+                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
+                break;
+            } else {
+                if(self.outputType == BASE64_STRING){
+                    [result_all addObject:[data base64EncodedStringWithOptions:0]];
                 } else {
                     [result_all addObject:[[NSURL fileURLWithPath:filePath] absoluteString]];
                 }
             }
-            
-            //Remove previous tmp file
-            if (![[NSFileManager defaultManager] removeItemAtPath:item.image_fullsize error:&err]){
-                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
-                break;
-            };
-            
         }
     }
 
@@ -274,5 +250,6 @@ typedef enum : NSUInteger {
 {
     NSLog(@"GMImagePicker: User pressed cancel button");
 }
+
 
 @end

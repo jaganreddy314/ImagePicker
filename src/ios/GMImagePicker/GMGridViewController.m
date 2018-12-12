@@ -4,7 +4,7 @@
 //
 //  Created by Guillermo Muntaner Perelló on 19/09/14.
 //  Copyright (c) 2014 Guillermo Muntaner Perelló. All rights reserved.
-//  Modified by Zehui Zhang on 11/12/18
+//
 
 #import "GMGridViewController.h"
 #import "GMImagePickerController.h"
@@ -455,26 +455,26 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         
         PHImageRequestOptions *ph_options = [[PHImageRequestOptions alloc] init];
         
-//        [ ph_options setNetworkAccessAllowed:YES];
+        [ ph_options setNetworkAccessAllowed:YES];
         
         // @BVL Set Deliverymode, in order to return highest quality
-//        [ ph_options setDeliveryMode: PHImageRequestOptionsDeliveryModeHighQualityFormat ]; // Best Quality
+        [ ph_options setDeliveryMode: PHImageRequestOptionsDeliveryModeHighQualityFormat ]; // Best Quality
 
-//        [ ph_options setProgressHandler:^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
-//
-//            fetch_item.percent = progress;
-//
-//            GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-//
-//            if ( cell ) {
-//                [ cell set_progress:progress animated:false];
-//            }
-//
-//        }];
-        ph_options.synchronous = YES;
+        [ ph_options setProgressHandler:^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
+            
+            fetch_item.percent = progress;
+            
+            GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+            
+            if ( cell ) {
+                [ cell set_progress:progress animated:false];
+            }
+            
+        }];
+        
         
             
-        [ self.imageManager requestImageDataForAsset:asset options:ph_options resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+        [ self.imageManager requestImageForAsset:asset targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeDefault options:ph_options resultHandler:^(UIImage *result, NSDictionary *info) {
             
             //dispatch_async(dispatch_get_main_queue(), ^{
             
@@ -499,23 +499,21 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
-                //2018-11-12，simPRO eForms-Peter-MA-1919-ExifInAttachment
-                //.fixOrientation will purge exif info, a full original size image may showing rotated
-                //Todo-figure out a way to fix orientation for original file as well
                 
                 // @BVL: Added orientation-fix to correctly display the returned result
-//                UIImage *result = [UIImage imageWithData:imageData];
-//
-//                NSLog(@"original orientation: %ld",(UIImageOrientation)result.imageOrientation);
-//
-//                UIImage *imageToDisplay = result.fixOrientation; //  UIImage+fixOrientation extension
-//
-//                NSLog(@"corrected orientation: %ld",(UIImageOrientation)imageToDisplay.imageOrientation);
-//
-//                if ( ![ UIImageJPEGRepresentation(result, 1.0) writeToFile:filePath atomically:YES ] ) {
-//                    return;
-//                }
-                if ( ![ imageData writeToFile:filePath atomically:YES ] ) {
+                
+//              if ( ![ UIImageJPEGRepresentation(result, 1.0f ) writeToFile:filePath atomically:YES ] ) {
+//                  return;
+//              }
+                
+                NSLog(@"original orientation: %ld",(UIImageOrientation)result.imageOrientation);
+                
+                UIImage *imageToDisplay = result.fixOrientation; //  UIImage+fixOrientation extension
+                
+                NSLog(@"corrected orientation: %ld",(UIImageOrientation)imageToDisplay.imageOrientation);
+
+                // setting compression to a low value (high compression) impact performance, but not actual img quality
+                if ( ![ UIImageJPEGRepresentation(imageToDisplay, 0.2f ) writeToFile:filePath atomically:YES ] ) {
                     return;
                 }
                 
