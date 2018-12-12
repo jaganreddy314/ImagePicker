@@ -176,13 +176,15 @@ typedef enum : NSUInteger {
     NSMutableArray * result_all = [[NSMutableArray alloc] init];
     int i = 1;
     NSString* filePath;
+    NSLog(@"filePath %@", filePath);
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     //Clean or move the temp file after invoked this plugin when not in use, transfering the file into persistent.
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+    NSLog(@"docsPath %@", docsPath);
     CDVPluginResult* result = nil;
 
     for (GMFetchItem *item in fetchArray) {
-
+        NSLog(@"item %@", item);
         if ( !item.image_fullsize ) { 
             continue;
         }
@@ -198,9 +200,10 @@ typedef enum : NSUInteger {
             //Initialization
             NSMutableData *destData = nil;
             NSError* err = nil;
-
             do {
-                filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
+                NSString *timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
+                //  + (i++)
+                filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, timeSince, @"jpg"];
             } while ([fileMgr fileExistsAtPath:filePath]);
             //Create image source
             NSURL * imageFileURL = [NSURL fileURLWithPath:item.image_fullsize];
