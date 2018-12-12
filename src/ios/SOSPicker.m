@@ -254,6 +254,11 @@ typedef enum : NSUInteger {
                 }
             }
             
+            //Remove previous tmp file
+            if (![[NSFileManager defaultManager] removeItemAtPath:item.image_fullsize error:&err]){
+                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
+                break;
+            };
             
         }
     }
