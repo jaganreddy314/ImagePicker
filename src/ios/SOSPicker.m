@@ -200,7 +200,7 @@ typedef enum : NSUInteger {
             NSMutableData *destData = nil;
             NSError* err = nil;
             do {
-                                NSString *strTimeStamp = [NSString stringWithFormat:@"%lld",(long long)([[NSDate date] timeIntervalSince1970] * 1000)];
+                NSString* strTimeStamp = [NSString stringWithFormat:@"%lld",(long long)([[NSDate date] timeIntervalSince1970] * 1000)];
                 NSString* randomID = [NSString stringWithFormat:@"%ld",(long)(arc4random() % 9000 + 1000)];
                 NSString* strUniqueID = [NSString stringWithFormat:@"%@%@",strTimeStamp,randomID];
                 filePath = [NSString stringWithFormat:@"%@/%@%@.%@", docsPath, CDV_PHOTO_PREFIX, strUniqueID, @"jpg"];
