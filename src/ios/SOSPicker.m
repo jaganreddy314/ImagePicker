@@ -201,7 +201,7 @@ typedef enum : NSUInteger {
             NSMutableData *destData = nil;
             NSError* err = nil;
             do {
-                // NSString *timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
+                NSString *timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
                 filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
             } while ([fileMgr fileExistsAtPath:filePath]);
             //Create image source
