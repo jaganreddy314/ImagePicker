@@ -208,13 +208,13 @@ typedef enum : NSUInteger {
                 NSLog(@"The strTime is = %@",strTime);
 
 
-                NSDateComponents *comps = [[NSCalendar currentCalendar] 
-                                        components:NSDayCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit 
-                                        fromDate:[NSDate date]];
-                [comps setHour:0];
-                [comps setMinute:0];    
-                [comps setSecond:[[NSTimeZone systemTimeZone] secondsFromGMT]];
-                NSLog(@"BLAH %@", [[[NSCalendar currentCalendar] dateFromComponents:comps] timeIntervalSince1970];
+                // NSDateComponents *comps = [[NSCalendar currentCalendar] 
+                //                         components:NSDayCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit 
+                //                         fromDate:[NSDate date]];
+                // [comps setHour:0];
+                // [comps setMinute:0];    
+                // [comps setSecond:[[NSTimeZone systemTimeZone] secondsFromGMT]];
+                // NSLog(@"BLAH %@", [[[NSCalendar currentCalendar] dateFromComponents:comps] timeIntervalSince1970];
 
 
 
