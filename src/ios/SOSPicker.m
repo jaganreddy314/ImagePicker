@@ -174,10 +174,8 @@ typedef enum : NSUInteger {
     NSLog(@"GMImagePicker: User finished picking assets. Number of selected items is: %lu", (unsigned long)fetchArray.count);
 
     NSMutableArray * result_all = [[NSMutableArray alloc] init];
-    int i = 1;
     NSString* filePath;
     NSLog(@"filePath %@", filePath);
-    NSString* timeSince;
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     //Clean or move the temp file after invoked this plugin when not in use, transfering the file into persistent.
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
@@ -202,32 +200,10 @@ typedef enum : NSUInteger {
             NSMutableData *destData = nil;
             NSError* err = nil;
             do {
-                NSDateFormatter *objDateformat = [[NSDateFormatter alloc] init];
-                [objDateformat setDateFormat:@"yyyyMMddhhmmss"];
-                NSString    *strTime = [objDateformat stringFromDate:[NSDate date]];
-                NSLog(@"The strTime is = %@",strTime);
-
-
-                // NSDateComponents *comps = [[NSCalendar currentCalendar] 
-                //                         components:NSDayCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit 
-                //                         fromDate:[NSDate date]];
-                // [comps setHour:0];
-                // [comps setMinute:0];    
-                // [comps setSecond:[[NSTimeZone systemTimeZone] secondsFromGMT]];
-                // NSLog(@"BLAH %@", [[[NSCalendar currentCalendar] dateFromComponents:comps] timeIntervalSince1970];
-
-
-
-                // NSString    *strUTCTime = [self GetUTCDateTimeFromLocalTime:strTime];//You can pass your date but be carefull about your date format of NSDateFormatter.
-                // NSLog(@"The strUTCTime is = %@",strUTCTime);
-                // NSDate *objUTCDate  = [objDateformat dateFromString:strUTCTime];
-                // long long milliseconds = (long long)([objUTCDate timeIntervalSince1970] * 1000.0);
-
-                // NSString *strTimeStamp = [Nsstring stringwithformat:@"%lld",milliseconds];
-                // NSLog(@"The Timestamp is = %@",strTimestamp);
-
-                //timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
-                filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
+                                NSString *strTimeStamp = [NSString stringWithFormat:@"%lld",(long long)([[NSDate date] timeIntervalSince1970] * 1000)];
+                NSString* randomID = [NSString stringWithFormat:@"%ld",(long)(arc4random() % 9000 + 1000)];
+                NSString* strUniqueID = [NSString stringWithFormat:@"%@%@",strTimeStamp,randomID];
+                filePath = [NSString stringWithFormat:@"%@/%@%@.%@", docsPath, CDV_PHOTO_PREFIX, strUniqueID, @"jpg"];
             } while ([fileMgr fileExistsAtPath:filePath]);
             //Create image source
             NSURL * imageFileURL = [NSURL fileURLWithPath:item.image_fullsize];
