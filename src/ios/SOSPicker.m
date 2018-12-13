@@ -203,9 +203,21 @@ typedef enum : NSUInteger {
             NSError* err = nil;
             do {
                 NSDateFormatter *objDateformat = [[NSDateFormatter alloc] init];
-                [objDateformat setDateFormat:@"yyyy-MM-dd"];
+                [objDateformat setDateFormat:@"yyyyMMddhhmmss"];
                 NSString    *strTime = [objDateformat stringFromDate:[NSDate date]];
                 NSLog(@"The strTime is = %@",strTime);
+
+
+                NSDateComponents *comps = [[NSCalendar currentCalendar] 
+                                        components:NSDayCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit 
+                                        fromDate:[NSDate date]];
+                [comps setHour:0];
+                [comps setMinute:0];    
+                [comps setSecond:[[NSTimeZone systemTimeZone] secondsFromGMT]];
+                NSLog(@"BLAH %@", [[[NSCalendar currentCalendar] dateFromComponents:comps] timeIntervalSince1970];
+
+
+
                 // NSString    *strUTCTime = [self GetUTCDateTimeFromLocalTime:strTime];//You can pass your date but be carefull about your date format of NSDateFormatter.
                 // NSLog(@"The strUTCTime is = %@",strUTCTime);
                 // NSDate *objUTCDate  = [objDateformat dateFromString:strUTCTime];
