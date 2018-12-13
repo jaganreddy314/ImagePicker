@@ -191,16 +191,19 @@ typedef enum : NSUInteger {
         
         // no scaling, no downsampling, this is the fastest option
         if (self.width == 0 && self.height == 0 && self.quality == 100 && self.outputType != BASE64_STRING) {
+            NSLog(@"exif fix %@");
             //2018-11-12，simPRO eForms-Peter-MA-1919-ExifInAttachment
             //In GMGridViewController .fixOrientation will purge exif info, a full original size image may showing rotated
             //Todo-figure out a way to fix orientation for original file as well
             //Since we are not using original file, this issue is less priority
             [result_all addObject:item.image_fullsize];
         }  else {
+            NSLog(@"Initialisation %@");
             //Initialization
             NSMutableData *destData = nil;
             NSError* err = nil;
             do {
+                NSLog(@"looping through existing files... %@");
                 NSString *timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
                 //  + (i++)
                 filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, timeSince, @"jpg"];
