@@ -206,7 +206,7 @@ typedef enum : NSUInteger {
                 [objDateformat setDateFormat:@"yyyy-MM-dd"];
                 NSString    *strTime = [objDateformat stringFromDate:[NSDate date]];
                 NSString    *strUTCTime = [self GetUTCDateTimeFromLocalTime:strTime];//You can pass your date but be carefull about your date format of NSDateFormatter.
-                NSDate *objUTCDate  = [objDateformat dateFromString:strUTCTime];
+                // NSDate *objUTCDate  = [objDateformat dateFromString:strUTCTime];
                 // long long milliseconds = (long long)([objUTCDate timeIntervalSince1970] * 1000.0);
 
                 // NSString *strTimeStamp = [Nsstring stringwithformat:@"%lld",milliseconds];
