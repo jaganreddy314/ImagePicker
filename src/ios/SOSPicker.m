@@ -203,9 +203,13 @@ typedef enum : NSUInteger {
             NSError* err = nil;
             do {
                 NSDateFormatter *dateFormatter=[[NSDateFormatter alloc] init]; 
-                [dateFormatter setDateFormat:@"%f"];
+                [dateFormatter setDateFormat:@"%f%@"];
                 // or @"yyyy-MM-dd hh:mm:ss a" if you prefer the time with AM/PM 
                 NSLog(@"%@",[dateFormatter stringFromDate:[NSDate date]]);
+                NSDate *date = [NSDate date];
+                NSTimeInterval ti = (long)[date timeIntervalSince1970];
+                NSLog(@"ti: %@",ti);
+                
                 //timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
                 filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
             } while ([fileMgr fileExistsAtPath:filePath]);
