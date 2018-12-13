@@ -203,7 +203,7 @@ typedef enum : NSUInteger {
             NSError* err = nil;
             do {
                 NSDateFormatter *dateFormatter=[[NSDateFormatter alloc] init]; 
-                [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+                [dateFormatter setDateFormat:@"%f"];
                 // or @"yyyy-MM-dd hh:mm:ss a" if you prefer the time with AM/PM 
                 NSLog(@"%@",[dateFormatter stringFromDate:[NSDate date]]);
                 //timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
