@@ -177,6 +177,7 @@ typedef enum : NSUInteger {
     int i = 1;
     NSString* filePath;
     NSLog(@"filePath %@", filePath);
+    NSString* timeSince;
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     //Clean or move the temp file after invoked this plugin when not in use, transfering the file into persistent.
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
@@ -201,7 +202,7 @@ typedef enum : NSUInteger {
             NSMutableData *destData = nil;
             NSError* err = nil;
             do {
-                NSString *timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
+                timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
                 filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
             } while ([fileMgr fileExistsAtPath:filePath]);
             //Create image source
