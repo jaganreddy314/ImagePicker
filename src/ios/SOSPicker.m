@@ -205,12 +205,12 @@ typedef enum : NSUInteger {
                 NSDateFormatter *objDateformat = [[NSDateFormatter alloc] init];
                 [objDateformat setDateFormat:@"yyyy-MM-dd"];
                 NSString    *strTime = [objDateformat stringFromDate:[NSDate date]];
-                NSString    *strUTCTime = [self GetUTCDateTimeFromLocalTime:strTime];//You can pass your date but be carefull about your date format of NSDateFormatter.
-                NSDate *objUTCDate  = [objDateformat dateFromString:strUTCTime];
-                long long milliseconds = (long long)([objUTCDate timeIntervalSince1970] * 1000.0);
+                // NSString    *strUTCTime = [self GetUTCDateTimeFromLocalTime:strTime];//You can pass your date but be carefull about your date format of NSDateFormatter.
+                // NSDate *objUTCDate  = [objDateformat dateFromString:strUTCTime];
+                // long long milliseconds = (long long)([objUTCDate timeIntervalSince1970] * 1000.0);
 
-                NSString *strTimeStamp = [Nsstring stringwithformat:@"%lld",milliseconds];
-                NSLog(@"The Timestamp is = %@",strTimestamp);
+                // NSString *strTimeStamp = [Nsstring stringwithformat:@"%lld",milliseconds];
+                // NSLog(@"The Timestamp is = %@",strTimestamp);
 
                 //timeSince = [NSString stringWithFormat:@”%f”,[[NSDate date] timeIntervalSince1970] * 1000];
                 filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
